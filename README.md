@@ -22,4 +22,5 @@ python.exe g0-optim.py [options] input [output]
 ![Gcode with no G0 optimization](images/before.png)
 ### After
 ![Gcode with G0 optimization](images/after.png)
+
 Gcode visualisation: https://ncviewer.com/
