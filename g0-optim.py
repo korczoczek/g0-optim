@@ -1,7 +1,7 @@
 # Autor: Daniel Korczok 2023
 
 from array import *
-import sys
+#import sys
 import math
 import os
 import argparse
@@ -50,7 +50,7 @@ for i,linia in enumerate(lista):
     F=0
     if args.verbose:
         if i%100==0:
-            print("Odczyt: {0}/{1}".format(i,length),end="\r")
+            print("Read: {0}/{1}".format(i,length),end="\r")
     ruch=linia.replace(';',' ').split()
     if len(ruch)>1:
         if linia.startswith('N'):
@@ -77,7 +77,7 @@ for i,linia in enumerate(lista):
             startX=X
             startY=Y
 if args.verbose:
-    print("Odczyt: {0}/{0}".format(length))
+    print("Read: {0}/{0}".format(length))
 bloki=[]#bloki ruchów interpolowanych oddzielonymi ruchami G0
 #startBloku,koniecBloku,początekIndex
 for i,ruch in enumerate(ruchy):
@@ -102,13 +102,13 @@ for blok in bloki:
     prevY=blok[5]
 preOpti=round(preOpti,2)
 if not args.quiet:
-    print("G0 przed optymalizają: {0}{1}".format(preOpti,unit))
+    print("G0 before optimization: {0}{1}".format(preOpti,unit))
 #sortowanie bloków
 blokiLen=len(bloki)
 for i in range(len(bloki[:-1])):
     if args.verbose:
         if i%100==0:
-            print("Optymalizowanie: {0}/{1}".format(i,blokiLen),end="\r")
+            print("Optimizing: {0}/{1}".format(i,blokiLen),end="\r")
     blok=bloki[i]
     trasy=[]
     for podblok in bloki[i+1:]:
@@ -121,7 +121,7 @@ for i in range(len(bloki[:-1])):
         bloki[i+j+1]=bloki[i+1]
         bloki[i+1]=temp
 if args.verbose:
-    print("Optymalizowanie: {0}/{0}".format(blokiLen))
+    print("Optimizing: {0}/{0}".format(blokiLen))
 #trasa po optymalizacji
 postOpti=float(0)
 prevX=float(0)
@@ -132,8 +132,8 @@ for blok in bloki:
     prevY=blok[5]
 postOpti=round(postOpti,2)
 if not args.quiet:
-    print("G0 po optymalizacji: {0}{1}".format(postOpti,unit))
-    print("Redukcja {}%".format(round((1-(postOpti/preOpti))*100,1)))
+    print("G0 after optimization: {0}{1}".format(postOpti,unit))
+    print("{}% reduction of G0 movement".format(round((1-(postOpti/preOpti))*100,1)))
 #zapis gkodu do pliku
 n=1
 out=""
@@ -148,7 +148,7 @@ length=len(bloki)
 for i,blok in enumerate(bloki):
     if args.verbose:
         if i%25==0:
-            print("Zapis: {0}/{1}".format(i,length),end="\r")
+            print("Write: {0}/{1}".format(i,length),end="\r")
     out+="N{} M5\n".format(n)
     n+=1
     out+="N{2} G0 X{0:f} Y{1:f} \n".format(blok[2],blok[3],n)
@@ -168,10 +168,10 @@ n+=1
 out+="N{} M2\n".format(n)
 n+=1
 if args.verbose:
-    print("Zapis: {0}/{0}".format(length))
+    print("Write: {0}/{0}".format(length))
 f=open(nazwa,'w')
 f.write(out)
 path=os.path.realpath(f.name)
 f.close()
 if not args.quiet:
-    print("Gkod zapisano jako: {}".format(path))
+    print("G-code saved as: {}".format(path))
