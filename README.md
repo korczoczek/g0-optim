@@ -7,7 +7,7 @@ Intended to be used with G-codes generated via https://github.com/sameer/svg2gco
 - Support for G2/G3 circular movement
 - Automatic Metric/Imperial detection
 - Automatic trimming of long float values
-- Support for custon tool on/off sequences
+- Support for custom tool on/off sequences
 - Support for custom program start/end sequences
 - Optional line number generation
 
