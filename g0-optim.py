@@ -56,6 +56,8 @@ ruchyIndex=[] #indeks linii z ruchami
 startX=float(0)
 startY=float(0)
 length=len(lista)
+redundantG0Count=0
+prevWasG0=0
 for i,linia in enumerate(lista):
     F=0
     if args.verbose:
@@ -69,25 +71,40 @@ for i,linia in enumerate(lista):
             offset=-1
         if ruch[1+offset]=='G20':
             unit="in"
-        if ruch[1+offset]=='G1' or ruch[1+offset]=='G0' or ruch[1+offset]=='G2' or ruch[1+offset]=='G3':
+        X=[idx for idx in ruch if idx.startswith('X')]
+        Y=[idx for idx in ruch if idx.startswith('Y')]
+        if (ruch[1+offset]=='G1' or ruch[1+offset]=='G0' or ruch[1+offset]=='G2' or ruch[1+offset]=='G3') and (X!=[] or Y!=[]):
             ruchyIndex.append(i)
-            X=round(float(ruch[2+offset].lstrip("X")),args.trim)
-            Y=round(float(ruch[3+offset].lstrip('Y')),args.trim)
+            X=round(float(X[0].lstrip("X")),args.trim)
+            Y=round(float(Y[0].lstrip('Y')),args.trim)
+            F=[idx for idx in ruch if idx.startswith('F')]
+            if F!=[]:
+                F=round(float(F[0].lstrip('F')),args.trim)
+                if math.floor(F)==F:
+                    F=int(F)
+            else:
+                F=int(0)
             if(ruch[1]=='G2' or ruch[1]=='G3'):
-                R=round(float(ruch[4+offset].lstrip('R')),args.trim)
-                if len(ruch)>5+offset and ruch[5+offset].startswith('F'):
-                    F=float(ruch[5+offset].lstrip('F'))
+                R=[idx for idx in ruch if idx.startswith('R')]
+                R=round(float(R[0].lstrip('R')),args.trim)
             else:
                 R=float(0)
-                if len(ruch)>4+offset and ruch[4+offset].startswith('F'):
-                    F=float(ruch[4+offset].lstrip('F'))
-            if math.floor(F)==F:
-                F=int(F)
-            ruchy.append([ruch[1+offset],startX,startY,X,Y,R,F])
-            startX=X
-            startY=Y
+            if ruch[1+offset]=='G0':
+                lastG0=[ruch[1+offset],startX,startY,X,Y,R,F]
+                if prevWasG0:
+                    redundantG0Count+=1
+                prevWasG0=1 #1-G0, 0-anything else
+            else:
+                if prevWasG0:
+                    ruchy.append(lastG0)
+                ruchy.append([ruch[1+offset],startX,startY,X,Y,R,F])
+                prevWasG0=0
+                startX=X
+                startY=Y
 if args.verbose:
     print("Read: {0}/{0}".format(length))
+if not args.quiet:
+    print("Removed {} redundant G0 moves".format(redundantG0Count))
 bloki=[]#bloki ruchów interpolowanych oddzielonymi ruchami G0
 #startBloku,koniecBloku,początekIndex
 for i,ruch in enumerate(ruchy):
